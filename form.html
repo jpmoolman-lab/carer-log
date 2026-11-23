@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carer Visit Log</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen py-8 px-4">
+  <div class="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">Carer Visit Log</h1>
+      <p class="text-gray-600 text-sm mt-1">Check in or check out</p>
+    </div>
+
+    <!-- Step 1: Name + Action -->
+    <div id="step1" class="space-y-5">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Carer's Name</label>
+        <select id="carerSelect" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+          <option value="">Select your name...</option>
+          <option value="Michelle C">Michelle C</option>
+          <option value="Alyceia M">Alyceia M</option>
+          <option value="Ellie M">Ellie M</option>
+          <option value="Annabelle L">Annabelle L</option>
+          <option value="other">Other</option>
+        </select>
+        <input type="text" id="otherName" class="hidden w-full mt-3 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Enter your name">
+      </div>
+
+      <div id="scheduleInfo" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-900"></div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <button type="button" id="btnCheckin" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg">Check In</button>
+        <button type="button" id="btnCheckout" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg">Check Out</button>
+      </div>
+    </div>
+
+    <!-- Check-in Form -->
+    <form id="checkinForm" action="https://formsubmit.co/jpmoolman@gmail.com" method="POST" class="space-y-5 hidden">
+      <input type="hidden" name="_cc" value="jpm@fsace.com.au">
+      <input type="hidden" name="_subject" value="Carer CHECK-IN">
+      <input type="hidden" name="_template" value="table">
+      <input type="hidden" name="_next" id="ci_next">
+      <input type="text" name="_gotcha" style="display:none">
+      <input type="hidden" name="Type" value="Check-in">
+      <input type="hidden" id="ci_name" name="Carer Name">
+      <input type="hidden" id="ci_date" name="Date">
+
+      <div class="bg-gray-50 border rounded-lg p-4 text-sm">
+        <p><strong>Carer:</strong> <span id="ci_displayName"></span></p>
+        <p><strong>Date:</strong> <span id="ci_displayDate"></span></p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Time started caring</label>
+        <input type="time" id="ci_time" name="Time Started" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+        <textarea name="Notes" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Any notes..."></textarea>
+      </div>
+
+      <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg">Submit Check-in</button>
+    </form>
+
+    <!-- Check-out Form -->
+    <form id="checkoutForm" action="https://formsubmit.co/jpmoolman@gmail.com" method="POST" class="space-y-5 hidden">
+      <input type="hidden" name="_cc" value="jpm@fsace.com.au">
+      <input type="hidden" name="_subject" value="Carer CHECK-OUT">
+      <input type="hidden" name="_template" value="table">
+      <input type="hidden" name="_next" id="co_next">
+      <input type="text" name="_gotcha" style="display:none">
+      <input type="hidden" name="Type" value="Check-out">
+      <input type="hidden" id="co_name" name="Carer Name">
+      <input type="hidden" id="co_date" name="Date">
+
+      <div class="bg-gray-50 border rounded-lg p-4 text-sm">
+        <p><strong>Carer:</strong> <span id="co_displayName"></span></p>
+        <p><strong>Date:</strong> <span id="co_displayDate"></span></p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Time finished caring</label>
+        <input type="time" id="co_time" name="Time Finished" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+        <textarea name="Notes" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Any notes..."></textarea>
+      </div>
+
+      <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg">Submit Check-out</button>
+    </form>
+  </div>
+
+  <script>
+    const schedule = {
+      1: 'Michelle C — 8:30 AM till 2:00 PM',
+      2: 'Alyceia M — 8:30 AM till 4:00 PM',
+      3: 'Ellie M — 8:30 AM till 2:40 PM',
+      4: 'Alyceia M — 8:30 AM till 4:00 PM',
+      5: 'Annabelle L — 8:30 AM till 4:00 PM'
+    };
+
+    const base = window.location.origin + window.location.pathname.replace(/form\.html$/, '');
+    document.getElementById('ci_next').value = base + 'checkin-thanks.html';
+    document.getElementById('co_next').value = base + 'checkout-thanks.html';
+
+    const carerSelect = document.getElementById('carerSelect');
+    const otherName = document.getElementById('otherName');
+    const scheduleInfo = document.getElementById('scheduleInfo');
+
+    carerSelect.addEventListener('change', () => {
+      if (carerSelect.value === 'other') {
+        otherName.classList.remove('hidden');
+      } else {
+        otherName.classList.add('hidden');
+        otherName.value = '';
+      }
+      showSchedule();
+    });
+
+    function showSchedule() {
+      const day = new Date().getDay();
+      const text = schedule[day];
+      if (text) {
+        scheduleInfo.innerHTML = '<strong>Today\'s schedule:</strong> ' + text;
+        scheduleInfo.classList.remove('hidden');
+      } else {
+        scheduleInfo.classList.add('hidden');
+      }
+    }
+
+    function getName() {
+      if (carerSelect.value === 'other') return otherName.value.trim();
+      return carerSelect.value;
+    }
+
+    function pad(n) { return n < 10 ? '0' + n : n; }
+    function formatDate(d) {
+      return d.toLocaleDateString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    document.getElementById('btnCheckin').addEventListener('click', () => {
+      const name = getName();
+      if (!name) { alert('Please select or enter your name'); return; }
+      const now = new Date();
+      document.getElementById('step1').classList.add('hidden');
+      document.getElementById('ci_name').value = name;
+      document.getElementById('ci_displayName').textContent = name;
+      document.getElementById('ci_date').value = formatDate(now);
+      document.getElementById('ci_displayDate').textContent = formatDate(now);
+      document.getElementById('ci_time').value = pad(now.getHours()) + ':' + pad(now.getMinutes());
+      document.getElementById('checkinForm').classList.remove('hidden');
+    });
+
+    document.getElementById('btnCheckout').addEventListener('click', () => {
+      const name = getName();
+      if (!name) { alert('Please select or enter your name'); return; }
+      const now = new Date();
+      document.getElementById('step1').classList.add('hidden');
+      document.getElementById('co_name').value = name;
+      document.getElementById('co_displayName').textContent = name;
+      document.getElementById('co_date').value = formatDate(now);
+      document.getElementById('co_displayDate').textContent = formatDate(now);
+      document.getElementById('co_time').value = pad(now.getHours()) + ':' + pad(now.getMinutes());
+      document.getElementById('checkoutForm').classList.remove('hidden');
+    });
+  </script>
+</body>
+</html>
