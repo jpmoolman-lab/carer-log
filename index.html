@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carer Sign-In/Out - QR Landing</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+    <div class="mb-6">
+      <div class="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+        </svg>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-800">Carer Visit Log</h1>
+      <p class="text-gray-600 mt-2">Scan the QR code below with your phone camera to sign in or out.</p>
+    </div>
+
+    <div id="qrcode" class="flex justify-center my-6"></div>
+
+    <p class="text-sm text-gray-500 mt-4">Point your camera at the code. It will open the form automatically.</p>
+    <p class="text-xs text-gray-400 mt-6">For carers only • Secure & simple</p>
+  </div>
+
+  <script>
+    // Generate QR code pointing to the form page
+    // When hosted, this uses the current site origin
+    const formUrl = window.location.origin + window.location.pathname.replace(/index\.html$/, '') + 'form.html';
+    // Fallback if opened locally as file
+    const finalUrl = formUrl.startsWith('file:') ? 'https://your-hosted-site.com/form.html' : formUrl;
+
+    new QRCode(document.getElementById("qrcode"), {
+      text: finalUrl,
+      width: 220,
+      height: 220,
+      colorDark: "#4f46e5",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  </script>
+</body>
+</html>
