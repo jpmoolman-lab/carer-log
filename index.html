@@ -1,0 +1,726 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#123a63">
+  <meta name="description" content="Carer check-in and check-out register with email notifications.">
+  <title>Carer Check-In & Check-Out</title>
+  <style>
+    :root {
+      --navy: #123a63;
+      --blue: #1769aa;
+      --blue-dark: #0d4f86;
+      --green: #16845b;
+      --red: #b42318;
+      --amber: #9a6700;
+      --ink: #17212b;
+      --muted: #617181;
+      --line: #d7e0e8;
+      --surface: #ffffff;
+      --soft: #f3f7fa;
+      --shadow: 0 14px 36px rgba(18, 58, 99, .12);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top right, rgba(23, 105, 170, .14), transparent 34rem),
+        linear-gradient(180deg, #eef5fa 0, #f8fafc 55%, #edf3f7 100%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    .page { width: min(920px, calc(100% - 28px)); margin: 0 auto; padding: 26px 0 48px; }
+
+    .hero {
+      padding: 28px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--navy), var(--blue));
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow { margin: 0 0 8px; font-size: .76rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; opacity: .8; }
+    h1 { margin: 0; font-size: clamp(1.8rem, 5vw, 3rem); line-height: 1.05; }
+    .hero p:last-child { max-width: 670px; margin: 12px 0 0; line-height: 1.55; opacity: .9; }
+
+    .status-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .status-card, .panel {
+      background: rgba(255, 255, 255, .96);
+      border: 1px solid rgba(215, 224, 232, .95);
+      box-shadow: 0 9px 26px rgba(18, 58, 99, .08);
+    }
+
+    .status-card { padding: 15px 17px; border-radius: 14px; }
+    .status-label { display: block; color: var(--muted); font-size: .75rem; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; }
+    .status-value { display: block; margin-top: 5px; font-weight: 800; }
+
+    .panel { margin-top: 16px; padding: 24px; border-radius: var(--radius); }
+    .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+    h2 { margin: 0; color: var(--navy); font-size: 1.35rem; }
+    .panel-head p { margin: 5px 0 0; color: var(--muted); font-size: .94rem; }
+
+    .mode-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 6px; background: var(--soft); border-radius: 14px; }
+    .tab { border: 0; border-radius: 10px; padding: 12px 14px; color: var(--muted); background: transparent; font-weight: 800; cursor: pointer; }
+    .tab[aria-selected="true"] { color: #fff; background: var(--blue); box-shadow: 0 5px 14px rgba(23, 105, 170, .25); }
+
+    form { margin-top: 22px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 17px; }
+    .field { display: grid; gap: 7px; }
+    .field.full { grid-column: 1 / -1; }
+    label { font-size: .92rem; font-weight: 760; }
+    .help { margin: -2px 0 0; color: var(--muted); font-size: .79rem; line-height: 1.35; }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid #bfcbd6;
+      border-radius: 11px;
+      padding: 12px 13px;
+      color: var(--ink);
+      background: #fff;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(23, 105, 170, .14); }
+    input[readonly] { color: #415263; background: #eef3f7; cursor: not-allowed; }
+    textarea { min-height: 118px; resize: vertical; }
+
+    .actions { display: flex; align-items: center; gap: 12px; margin-top: 21px; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      border: 0;
+      border-radius: 11px;
+      padding: 12px 18px;
+      color: #fff;
+      background: var(--blue);
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .12s, background .12s, opacity .12s;
+    }
+    .btn:hover { background: var(--blue-dark); }
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled { cursor: wait; opacity: .62; }
+    .btn.secondary { color: var(--navy); background: #e6eef5; }
+    .btn.secondary:hover { background: #d8e5ef; }
+    .btn.small { min-height: 38px; padding: 9px 12px; font-size: .86rem; }
+
+    .notice { margin-top: 17px; padding: 13px 15px; border-radius: 11px; font-size: .9rem; line-height: 1.5; }
+    .notice.success { color: #0d5f42; background: #e7f7f0; border: 1px solid #a9dfc9; }
+    .notice.warning { color: #704d00; background: #fff7da; border: 1px solid #ebd589; }
+    .notice.error { color: #8f1b13; background: #fff0ef; border: 1px solid #f0b5b0; }
+    .hidden { display: none !important; }
+
+    .session-list, .history-list { display: grid; gap: 11px; }
+    .session {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: #fbfdfe;
+    }
+    .session strong { display: block; }
+    .session-meta { margin-top: 4px; color: var(--muted); font-size: .84rem; line-height: 1.45; }
+    .badge { display: inline-flex; padding: 4px 8px; border-radius: 999px; color: #0b6242; background: #dff4eb; font-size: .75rem; font-weight: 800; }
+    .empty { padding: 18px; text-align: center; color: var(--muted); border: 1px dashed #bbc8d3; border-radius: 12px; }
+
+    .email-note { display: flex; align-items: flex-start; gap: 10px; margin-top: 17px; padding: 13px 15px; color: #33475a; background: #edf5fb; border-radius: 12px; font-size: .84rem; line-height: 1.48; }
+    .email-dot { flex: 0 0 auto; width: 10px; height: 10px; margin-top: 5px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px rgba(22, 132, 91, .13); }
+
+    .footer { padding: 20px 4px 0; text-align: center; color: var(--muted); font-size: .78rem; }
+
+    @media (max-width: 680px) {
+      .page { width: min(100% - 18px, 920px); padding-top: 9px; }
+      .hero { padding: 22px 20px; border-radius: 18px; }
+      .status-strip { grid-template-columns: 1fr; gap: 8px; }
+      .status-card { display: flex; align-items: baseline; justify-content: space-between; }
+      .panel { padding: 19px 16px; }
+      .grid { grid-template-columns: 1fr; }
+      .field.full { grid-column: auto; }
+      .session { grid-template-columns: 1fr; }
+      .session .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">Carer attendance register</p>
+      <h1>Check in. Care well. Check out.</h1>
+      <p>Select your name, record your start or finish time, and add any relevant notes. Each submission is saved on this device and emailed automatically.</p>
+    </header>
+
+    <section class="status-strip" aria-label="Current status">
+      <div class="status-card">
+        <span class="status-label">Brisbane date</span>
+        <span class="status-value" id="todayLabel">—</span>
+      </div>
+      <div class="status-card">
+        <span class="status-label">Active carers</span>
+        <span class="status-value" id="activeCount">0</span>
+      </div>
+      <div class="status-card">
+        <span class="status-label">Email notifications</span>
+        <span class="status-value" id="emailStatus">Ready</span>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="entryTitle">
+      <div class="panel-head">
+        <div>
+          <h2 id="entryTitle">New attendance entry</h2>
+          <p>The date and recorded submission time use Australia/Brisbane time.</p>
+        </div>
+      </div>
+
+      <div class="mode-tabs" role="tablist" aria-label="Entry type">
+        <button class="tab" id="checkInTab" type="button" role="tab" aria-selected="true">Check in</button>
+        <button class="tab" id="checkOutTab" type="button" role="tab" aria-selected="false">Check out</button>
+      </div>
+
+      <form id="checkInForm" novalidate>
+        <div class="grid">
+          <div class="field">
+            <label for="carerName">Carer name</label>
+            <select id="carerName" required>
+              <option value="">Select your name</option>
+            </select>
+          </div>
+          <div class="field hidden" id="otherNameWrap">
+            <label for="otherName">Enter your full name</label>
+            <input id="otherName" type="text" autocomplete="name" maxlength="100" placeholder="Full name">
+          </div>
+          <div class="field">
+            <label for="entryDate">Date</label>
+            <input id="entryDate" type="text" readonly aria-readonly="true">
+            <p class="help">Locked automatically so it cannot be changed.</p>
+          </div>
+          <div class="field">
+            <label for="startTime">Time started</label>
+            <input id="startTime" type="time" required>
+          </div>
+          <div class="field full">
+            <label for="checkInNotes">Check-in notes</label>
+            <textarea id="checkInNotes" maxlength="2000" placeholder="Optional notes about the start of care"></textarea>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" id="checkInSubmit" type="submit">Submit check-in</button>
+        </div>
+      </form>
+
+      <form id="checkOutForm" class="hidden" novalidate>
+        <div class="grid">
+          <div class="field full">
+            <label for="activeSession">Carer currently checked in</label>
+            <select id="activeSession" required>
+              <option value="">Select an active carer</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="checkoutDate">Date</label>
+            <input id="checkoutDate" type="text" readonly aria-readonly="true">
+            <p class="help">Locked automatically so it cannot be changed.</p>
+          </div>
+          <div class="field">
+            <label for="finishTime">Time finished caring</label>
+            <input id="finishTime" type="time" required>
+          </div>
+          <div class="field full">
+            <label for="checkOutNotes">Check-out notes</label>
+            <textarea id="checkOutNotes" maxlength="2000" placeholder="Optional notes about the completed care period"></textarea>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" id="checkOutSubmit" type="submit">Submit check-out</button>
+        </div>
+      </form>
+
+      <div id="formNotice" class="notice hidden" role="status" aria-live="polite"></div>
+      <div class="email-note">
+        <span class="email-dot" aria-hidden="true"></span>
+        <span>Notifications are sent to <strong>JPmoolman@gmail.com</strong>. On the first live submission, FormSubmit will send an activation email to that address; open it and confirm once to start delivery.</span>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="activeTitle">
+      <div class="panel-head">
+        <div>
+          <h2 id="activeTitle">Currently checked in</h2>
+          <p>Active care sessions saved on this device.</p>
+        </div>
+        <button id="retryEmails" class="btn secondary small hidden" type="button">Retry email</button>
+      </div>
+      <div id="sessionList" class="session-list"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="historyTitle">
+      <div class="panel-head">
+        <div>
+          <h2 id="historyTitle">Recent completed sessions</h2>
+          <p>The latest 20 completed check-ins and check-outs.</p>
+        </div>
+        <button id="exportCsv" class="btn secondary small" type="button">Export CSV</button>
+      </div>
+      <div id="historyList" class="history-list"></div>
+    </section>
+
+    <p class="footer">Records remain in this browser unless its site data is cleared. Email delivery requires an internet connection.</p>
+  </main>
+
+  <script>
+    "use strict";
+
+    // Replace these sample names with the actual carers' names.
+    const CARER_NAMES = [
+      "Carer 1",
+      "Carer 2",
+      "Carer 3"
+    ];
+
+    const EMAIL_RECIPIENT = "JPmoolman@gmail.com";
+    const EMAIL_ENDPOINT = `https://formsubmit.co/ajax/${EMAIL_RECIPIENT}`;
+    const TIME_ZONE = "Australia/Brisbane";
+    const STORAGE_KEY = "carerAttendanceSessionsV2";
+    const EMAIL_QUEUE_KEY = "carerAttendanceEmailQueueV1";
+
+    const $ = (id) => document.getElementById(id);
+    const elements = {
+      todayLabel: $("todayLabel"),
+      activeCount: $("activeCount"),
+      emailStatus: $("emailStatus"),
+      checkInTab: $("checkInTab"),
+      checkOutTab: $("checkOutTab"),
+      checkInForm: $("checkInForm"),
+      checkOutForm: $("checkOutForm"),
+      carerName: $("carerName"),
+      otherNameWrap: $("otherNameWrap"),
+      otherName: $("otherName"),
+      entryDate: $("entryDate"),
+      startTime: $("startTime"),
+      checkInNotes: $("checkInNotes"),
+      activeSession: $("activeSession"),
+      checkoutDate: $("checkoutDate"),
+      finishTime: $("finishTime"),
+      checkOutNotes: $("checkOutNotes"),
+      checkInSubmit: $("checkInSubmit"),
+      checkOutSubmit: $("checkOutSubmit"),
+      formNotice: $("formNotice"),
+      sessionList: $("sessionList"),
+      historyList: $("historyList"),
+      retryEmails: $("retryEmails"),
+      exportCsv: $("exportCsv")
+    };
+
+    function loadJson(key, fallback) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key));
+        return Array.isArray(value) ? value : fallback;
+      } catch (_) {
+        return fallback;
+      }
+    }
+
+    let sessions = loadJson(STORAGE_KEY, []);
+    let emailQueue = loadJson(EMAIL_QUEUE_KEY, []);
+    let sendingQueue = false;
+
+    function saveSessions() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+    }
+
+    function saveEmailQueue() {
+      localStorage.setItem(EMAIL_QUEUE_KEY, JSON.stringify(emailQueue));
+      updateEmailStatus();
+    }
+
+    function brisbaneParts(date = new Date()) {
+      const parts = new Intl.DateTimeFormat("en-AU", {
+        timeZone: TIME_ZONE,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23"
+      }).formatToParts(date).reduce((result, part) => {
+        if (part.type !== "literal") result[part.type] = part.value;
+        return result;
+      }, {});
+
+      return {
+        isoDate: `${parts.year}-${parts.month}-${parts.day}`,
+        displayDate: `${parts.day}/${parts.month}/${parts.year}`,
+        time: `${parts.hour}:${parts.minute}`
+      };
+    }
+
+    function displayDate(isoDate) {
+      if (!isoDate) return "—";
+      const [year, month, day] = isoDate.split("-");
+      return `${day}/${month}/${year}`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>'"]/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+      })[character]);
+    }
+
+    function makeId() {
+      if (crypto.randomUUID) return crypto.randomUUID();
+      return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function setNotice(message, type = "success") {
+      elements.formNotice.textContent = message;
+      elements.formNotice.className = `notice ${type}`;
+    }
+
+    function clearNotice() {
+      elements.formNotice.textContent = "";
+      elements.formNotice.className = "notice hidden";
+    }
+
+    function setMode(mode) {
+      const checkingIn = mode === "in";
+      elements.checkInTab.setAttribute("aria-selected", String(checkingIn));
+      elements.checkOutTab.setAttribute("aria-selected", String(!checkingIn));
+      elements.checkInForm.classList.toggle("hidden", !checkingIn);
+      elements.checkOutForm.classList.toggle("hidden", checkingIn);
+      clearNotice();
+      if (!checkingIn) renderActiveSelect();
+    }
+
+    function initialiseNames() {
+      CARER_NAMES.forEach((name) => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        elements.carerName.appendChild(option);
+      });
+      const other = document.createElement("option");
+      other.value = "__other__";
+      other.textContent = "Other — enter a name";
+      elements.carerName.appendChild(other);
+    }
+
+    function syncDateAndTime() {
+      const now = brisbaneParts();
+      elements.todayLabel.textContent = now.displayDate;
+      elements.entryDate.value = now.displayDate;
+      elements.checkoutDate.value = now.displayDate;
+      if (!elements.startTime.value) elements.startTime.value = now.time;
+      if (!elements.finishTime.value) elements.finishTime.value = now.time;
+    }
+
+    function updateEmailStatus() {
+      const count = emailQueue.length;
+      elements.emailStatus.textContent = count ? `${count} pending` : "Ready";
+      elements.emailStatus.style.color = count ? "var(--amber)" : "var(--green)";
+      elements.retryEmails.classList.toggle("hidden", count === 0);
+      elements.retryEmails.textContent = count > 1 ? `Retry ${count} emails` : "Retry email";
+    }
+
+    function renderActiveSelect() {
+      const active = sessions.filter((session) => !session.checkOut);
+      const current = elements.activeSession.value;
+      elements.activeSession.innerHTML = '<option value="">Select an active carer</option>';
+      active.forEach((session) => {
+        const option = document.createElement("option");
+        option.value = session.id;
+        option.textContent = `${session.carer} — ${displayDate(session.date)} at ${session.checkIn.time}`;
+        elements.activeSession.appendChild(option);
+      });
+      if (active.some((session) => session.id === current)) elements.activeSession.value = current;
+    }
+
+    function renderSessions() {
+      const active = sessions.filter((session) => !session.checkOut).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      elements.activeCount.textContent = String(active.length);
+      elements.sessionList.innerHTML = active.length ? active.map((session) => `
+        <article class="session">
+          <div>
+            <strong>${escapeHtml(session.carer)} <span class="badge">Checked in</span></strong>
+            <div class="session-meta">${escapeHtml(displayDate(session.date))} at ${escapeHtml(session.checkIn.time)}${session.checkIn.notes ? `<br>${escapeHtml(session.checkIn.notes)}` : ""}</div>
+          </div>
+          <button class="btn small" type="button" data-checkout-id="${escapeHtml(session.id)}">Check out</button>
+        </article>
+      `).join("") : '<div class="empty">No carers are currently checked in.</div>';
+
+      const completed = sessions.filter((session) => session.checkOut).sort((a, b) => b.checkOut.recordedAt.localeCompare(a.checkOut.recordedAt)).slice(0, 20);
+      elements.historyList.innerHTML = completed.length ? completed.map((session) => `
+        <article class="session">
+          <div>
+            <strong>${escapeHtml(session.carer)}</strong>
+            <div class="session-meta">${escapeHtml(displayDate(session.date))} · ${escapeHtml(session.checkIn.time)} to ${escapeHtml(session.checkOut.time)}${session.checkOut.notes ? `<br>${escapeHtml(session.checkOut.notes)}` : ""}</div>
+          </div>
+          <span class="badge">Completed</span>
+        </article>
+      `).join("") : '<div class="empty">No completed sessions yet.</div>';
+
+      renderActiveSelect();
+    }
+
+    function queueEmail(payload) {
+      emailQueue.push({ id: makeId(), payload, queuedAt: new Date().toISOString(), attempts: 0 });
+      saveEmailQueue();
+    }
+
+    async function sendEmailPayload(payload) {
+      const response = await fetch(EMAIL_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      let result = {};
+      try { result = await response.json(); } catch (_) { /* The HTTP status still controls success. */ }
+      if (!response.ok || result.success === "false" || result.success === false) {
+        throw new Error(result.message || `Email service returned ${response.status}`);
+      }
+      return result;
+    }
+
+    async function processEmailQueue() {
+      if (sendingQueue || !emailQueue.length || !navigator.onLine) {
+        updateEmailStatus();
+        return { sent: 0, remaining: emailQueue.length };
+      }
+
+      sendingQueue = true;
+      elements.emailStatus.textContent = "Sending…";
+      let sent = 0;
+      const remaining = [];
+
+      for (const item of emailQueue) {
+        try {
+          await sendEmailPayload(item.payload);
+          sent += 1;
+        } catch (error) {
+          remaining.push({ ...item, attempts: item.attempts + 1, lastError: String(error.message || error) });
+        }
+      }
+
+      emailQueue = remaining;
+      sendingQueue = false;
+      saveEmailQueue();
+      return { sent, remaining: remaining.length };
+    }
+
+    function emailPayloadForCheckIn(session) {
+      return {
+        _subject: `Carer check-in: ${session.carer} — ${displayDate(session.date)} ${session.checkIn.time}`,
+        _template: "table",
+        _captcha: "false",
+        Submission: "CHECK IN",
+        Carer: session.carer,
+        Date: displayDate(session.date),
+        "Time started": session.checkIn.time,
+        Notes: session.checkIn.notes || "No notes provided",
+        "Recorded at (Brisbane)": session.checkIn.recordedAtBrisbane,
+        "Submission ID": session.id,
+        "App page": location.href
+      };
+    }
+
+    function emailPayloadForCheckOut(session) {
+      return {
+        _subject: `Carer check-out: ${session.carer} — ${displayDate(session.date)} ${session.checkOut.time}`,
+        _template: "table",
+        _captcha: "false",
+        Submission: "CHECK OUT",
+        Carer: session.carer,
+        Date: displayDate(session.date),
+        "Time started": session.checkIn.time,
+        "Time finished": session.checkOut.time,
+        "Check-in notes": session.checkIn.notes || "No notes provided",
+        "Check-out notes": session.checkOut.notes || "No notes provided",
+        "Recorded at (Brisbane)": session.checkOut.recordedAtBrisbane,
+        "Submission ID": session.id,
+        "App page": location.href
+      };
+    }
+
+    function recordedAtBrisbane() {
+      const now = brisbaneParts();
+      return `${now.displayDate} ${now.time}`;
+    }
+
+    elements.carerName.addEventListener("change", () => {
+      const isOther = elements.carerName.value === "__other__";
+      elements.otherNameWrap.classList.toggle("hidden", !isOther);
+      elements.otherName.required = isOther;
+      if (!isOther) elements.otherName.value = "";
+    });
+
+    elements.checkInTab.addEventListener("click", () => setMode("in"));
+    elements.checkOutTab.addEventListener("click", () => setMode("out"));
+
+    elements.checkInForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      clearNotice();
+
+      const selected = elements.carerName.value;
+      const carer = selected === "__other__" ? elements.otherName.value.trim() : selected;
+      if (!carer || !elements.startTime.value) {
+        setNotice("Please select or enter a carer name and enter the time started.", "error");
+        return;
+      }
+
+      const now = brisbaneParts();
+      const duplicate = sessions.some((session) => !session.checkOut && session.carer.toLowerCase() === carer.toLowerCase());
+      if (duplicate) {
+        setNotice(`${carer} is already checked in. Please use the check-out form.`, "error");
+        return;
+      }
+
+      const session = {
+        id: makeId(),
+        carer,
+        date: now.isoDate,
+        createdAt: new Date().toISOString(),
+        checkIn: {
+          time: elements.startTime.value,
+          notes: elements.checkInNotes.value.trim(),
+          recordedAt: new Date().toISOString(),
+          recordedAtBrisbane: recordedAtBrisbane()
+        },
+        checkOut: null
+      };
+
+      sessions.push(session);
+      saveSessions();
+      queueEmail(emailPayloadForCheckIn(session));
+      renderSessions();
+
+      elements.checkInSubmit.disabled = true;
+      elements.checkInSubmit.textContent = "Sending…";
+      const outcome = await processEmailQueue();
+      elements.checkInSubmit.disabled = false;
+      elements.checkInSubmit.textContent = "Submit check-in";
+
+      elements.checkInForm.reset();
+      elements.otherNameWrap.classList.add("hidden");
+      elements.otherName.required = false;
+      syncDateAndTime();
+
+      if (outcome.remaining === 0) {
+        setNotice(`Check-in saved for ${carer} and the email notification was sent.`, "success");
+      } else {
+        setNotice(`Check-in saved for ${carer}. The email could not be sent yet and is queued for retry.`, "warning");
+      }
+    });
+
+    elements.checkOutForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      clearNotice();
+
+      const session = sessions.find((item) => item.id === elements.activeSession.value && !item.checkOut);
+      if (!session || !elements.finishTime.value) {
+        setNotice("Please select an active carer and enter the finishing time.", "error");
+        return;
+      }
+
+      session.checkOut = {
+        time: elements.finishTime.value,
+        notes: elements.checkOutNotes.value.trim(),
+        recordedAt: new Date().toISOString(),
+        recordedAtBrisbane: recordedAtBrisbane()
+      };
+      saveSessions();
+      queueEmail(emailPayloadForCheckOut(session));
+      renderSessions();
+
+      elements.checkOutSubmit.disabled = true;
+      elements.checkOutSubmit.textContent = "Sending…";
+      const outcome = await processEmailQueue();
+      elements.checkOutSubmit.disabled = false;
+      elements.checkOutSubmit.textContent = "Submit check-out";
+
+      const carer = session.carer;
+      elements.checkOutForm.reset();
+      syncDateAndTime();
+
+      if (outcome.remaining === 0) {
+        setNotice(`Check-out saved for ${carer} and the email notification was sent.`, "success");
+      } else {
+        setNotice(`Check-out saved for ${carer}. The email could not be sent yet and is queued for retry.`, "warning");
+      }
+    });
+
+    elements.sessionList.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-checkout-id]");
+      if (!button) return;
+      setMode("out");
+      elements.activeSession.value = button.dataset.checkoutId;
+      elements.finishTime.focus();
+      window.scrollTo({ top: elements.checkOutForm.getBoundingClientRect().top + window.scrollY - 20, behavior: "smooth" });
+    });
+
+    elements.retryEmails.addEventListener("click", async () => {
+      elements.retryEmails.disabled = true;
+      const outcome = await processEmailQueue();
+      elements.retryEmails.disabled = false;
+      if (outcome.remaining === 0) {
+        setNotice("All queued email notifications were sent.", "success");
+      } else {
+        setNotice(`${outcome.remaining} email notification${outcome.remaining === 1 ? " is" : "s are"} still queued. Check the internet connection and try again.`, "warning");
+      }
+    });
+
+    elements.exportCsv.addEventListener("click", () => {
+      if (!sessions.length) {
+        setNotice("There are no attendance records to export yet.", "warning");
+        return;
+      }
+      const rows = [["Carer", "Date", "Start time", "Check-in notes", "Finish time", "Check-out notes", "Status"]];
+      sessions.forEach((session) => rows.push([
+        session.carer,
+        displayDate(session.date),
+        session.checkIn.time,
+        session.checkIn.notes,
+        session.checkOut?.time || "",
+        session.checkOut?.notes || "",
+        session.checkOut ? "Completed" : "Checked in"
+      ]));
+      const csv = rows.map((row) => row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(",")).join("\r\n");
+      const blob = new Blob(["\ufeff", csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `carer-attendance-${brisbaneParts().isoDate}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    window.addEventListener("online", processEmailQueue);
+
+    initialiseNames();
+    syncDateAndTime();
+    renderSessions();
+    updateEmailStatus();
+    processEmailQueue();
+  </script>
+</body>
+</html>
