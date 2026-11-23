@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carer Check-in / Check-out</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; }
+    .readonly { background-color: #f3f4f6; cursor: not-allowed; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen py-8 px-4">
+  <div class="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-bold text-gray-800" id="pageTitle">Carer Visit</h1>
+      <p class="text-gray-600 text-sm mt-1" id="pageSubtitle">Enter your details</p>
+    </div>
+
+    <!-- Name entry -->
+    <div id="nameSection" class="space-y-5">
+      <div>
+        <label for="carerName" class="block text-sm font-medium text-gray-700 mb-1">Carer's Name</label>
+        <input type="text" id="carerName" required
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+          placeholder="Enter your full name">
+      </div>
+      <button type="button" id="continueBtn"
+        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 shadow-md">
+        Continue
+      </button>
+    </div>
+
+    <!-- Check-in Form -->
+    <form id="checkinForm" action="https://formsubmit.co/jpmoolman@gmail.com" method="POST" class="space-y-5 hidden">
+      <input type="hidden" name="_cc" value="jpm@fsace.com.au">
+      <input type="hidden" name="_subject" value="Carer CHECK-IN">
+      <input type="hidden" name="_template" value="table">
+      <input type="hidden" name="_next" value="thanks.html">
+      <input type="text" name="_gotcha" style="display:none">
+
+      <input type="hidden" name="Type" value="Check-in">
+      <input type="hidden" id="ci_name" name="Carer Name">
+      <input type="hidden" id="ci_date_submitted" name="Date Submitted">
+      <input type="hidden" id="ci_scheduled_display" name="Scheduled Shift">
+      <input type="hidden" id="ci_assigned" name="Assigned Carer for Day">
+
+      <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2 text-sm">
+        <p><strong>Date submitted:</strong> <span id="ci_displayDate"></span></p>
+        <p><strong>Day:</strong> <span id="ci_displayDay"></span></p>
+        <p><strong>Assigned carer:</strong> <span id="ci_displayAssigned"></span></p>
+        <p><strong>Scheduled shift:</strong> <span id="ci_displayScheduled"></span></p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Arrival time (when you started caring)</label>
+        <input type="time" id="ci_arrival" name="Arrival Time" required
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+        <textarea name="Notes" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" placeholder="Any comments..."></textarea>
+      </div>
+
+      <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 shadow-md">
+        Submit Check-in
+      </button>
+    </form>
+
+    <!-- Check-out Form -->
+    <form id="checkoutForm" action="https://formsubmit.co/jpmoolman@gmail.com" method="POST" class="space-y-5 hidden">
+      <input type="hidden" name="_cc" value="jpm@fsace.com.au">
+      <input type="hidden" name="_subject" value="Carer CHECK-OUT">
+      <input type="hidden" name="_template" value="table">
+      <input type="hidden" name="_next" value="thanks.html">
+      <input type="text" name="_gotcha" style="display:none">
+
+      <input type="hidden" name="Type" value="Check-out">
+      <input type="hidden" id="co_name" name="Carer Name">
+      <input type="hidden" id="co_date_submitted" name="Date Submitted">
+      <input type="hidden" id="co_scheduled_hidden" name="Scheduled Shift">
+      <input type="hidden" id="co_assigned" name="Assigned Carer for Day">
+
+      <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 space-y-2 text-sm">
+        <p><strong>Carer:</strong> <span id="co_displayName"></span></p>
+        <p><strong>Date submitted:</strong> <span id="co_displayDate"></span></p>
+        <p><strong>Day:</strong> <span id="co_displayDay"></span></p>
+        <p><strong>Assigned carer:</strong> <span id="co_displayAssigned"></span></p>
+        <p><strong>Scheduled shift:</strong> <span id="co_displayScheduled"></span></p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Check-out time</label>
+        <input type="time" id="co_time" name="Check-out Time" required
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+        <textarea name="Notes" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" placeholder="Any comments about the visit..."></textarea>
+      </div>
+
+      <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 shadow-md">
+        Submit Check-out
+      </button>
+    </form>
+  </div>
+
+  <script>
+    const nameSection = document.getElementById('nameSection');
+    const checkinForm = document.getElementById('checkinForm');
+    const checkoutForm = document.getElementById('checkoutForm');
+    const continueBtn = document.getElementById('continueBtn');
+    const carerNameInput = document.getElementById('carerName');
+
+    // Schedule rules
+    const schedule = {
+      1: { name: 'Michelle C', start: '08:30', end: '14:00', label: '8:30 AM – 2:00 PM' },   // Monday
+      2: { name: 'Alyceia M', start: '08:30', end: '16:00', label: '8:30 AM – 4:00 PM' },     // Tuesday
+      3: { name: 'Ellie M', start: '08:30', end: '14:40', label: '8:30 AM – 2:40 PM' },       // Wednesday
+      4: { name: 'Alyceia M', start: '08:30', end: '16:00', label: '8:30 AM – 4:00 PM' },     // Thursday
+      5: { name: 'Annabelle L', start: '08:30', end: '16:00', label: '8:30 AM – 4:00 PM' },   // Friday
+      0: null, // Sunday
+      6: null  // Saturday
+    };
+
+    function getStorageKey(name) {
+      return 'carer_' + name.trim().toLowerCase().replace(/\s+/g, '_');
+    }
+
+    function pad(n) { return n < 10 ? '0' + n : n; }
+
+    function formatDate(d) {
+      return d.toLocaleDateString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    function getDayInfo() {
+      const now = new Date();
+      const day = now.getDay();
+      return {
+        date: now,
+        dayNum: day,
+        dayName: now.toLocaleDateString('en-AU', { weekday: 'long' }),
+        info: schedule[day]
+      };
+    }
+
+    continueBtn.addEventListener('click', () => {
+      const name = carerNameInput.value.trim();
+      if (!name) {
+        alert('Please enter your name');
+        return;
+      }
+
+      const dayInfo = getDayInfo();
+      if (!dayInfo.info) {
+        alert('No scheduled visits on ' + dayInfo.dayName + '.');
+        return;
+      }
+
+      const key = getStorageKey(name);
+      const stored = localStorage.getItem(key);
+
+      nameSection.classList.add('hidden');
+
+      const submittedDate = formatDate(dayInfo.date);
+      const isoDate = dayInfo.date.toISOString().split('T')[0];
+
+      if (stored) {
+        // Check-out
+        const data = JSON.parse(stored);
+        document.getElementById('pageTitle').textContent = 'Check-out';
+        document.getElementById('pageSubtitle').textContent = 'Confirm your departure';
+
+        document.getElementById('co_name').value = name;
+        document.getElementById('co_displayName').textContent = name;
+        document.getElementById('co_date_submitted').value = submittedDate;
+        document.getElementById('co_displayDate').textContent = submittedDate;
+        document.getElementById('co_displayDay').textContent = dayInfo.dayName;
+        document.getElementById('co_assigned').value = dayInfo.info.name;
+        document.getElementById('co_displayAssigned').textContent = dayInfo.info.name;
+        document.getElementById('co_scheduled_hidden').value = dayInfo.info.label;
+        document.getElementById('co_displayScheduled').textContent = dayInfo.info.label;
+
+        // Auto-fill current time for checkout
+        const now = new Date();
+        document.getElementById('co_time').value = pad(now.getHours()) + ':' + pad(now.getMinutes());
+
+        checkoutForm.classList.remove('hidden');
+      } else {
+        // Check-in
+        document.getElementById('pageTitle').textContent = 'Check-in';
+        document.getElementById('pageSubtitle').textContent = 'Start your visit';
+
+        document.getElementById('ci_name').value = name;
+        document.getElementById('ci_date_submitted').value = submittedDate;
+        document.getElementById('ci_displayDate').textContent = submittedDate;
+        document.getElementById('ci_displayDay').textContent = dayInfo.dayName;
+        document.getElementById('ci_assigned').value = dayInfo.info.name;
+        document.getElementById('ci_displayAssigned').textContent = dayInfo.info.name;
+        document.getElementById('ci_scheduled_display').value = dayInfo.info.label;
+        document.getElementById('ci_displayScheduled').textContent = dayInfo.info.label;
+
+        // Auto-fill current time as suggested arrival
+        const now = new Date();
+        document.getElementById('ci_arrival').value = pad(now.getHours()) + ':' + pad(now.getMinutes());
+
+        checkinForm.classList.remove('hidden');
+      }
+    });
+
+    checkinForm.addEventListener('submit', () => {
+      const name = document.getElementById('ci_name').value;
+      const key = getStorageKey(name);
+      localStorage.setItem(key, JSON.stringify({
+        name: name,
+        checkedInAt: new Date().toISOString()
+      }));
+    });
+
+    checkoutForm.addEventListener('submit', () => {
+      const name = document.getElementById('co_name').value;
+      const key = getStorageKey(name);
+      localStorage.removeItem(key);
+    });
+  </script>
+</body>
+</html>
